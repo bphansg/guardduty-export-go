@@ -1,3 +1,28 @@
+/*
+GuardDuty Findings Exporter
+
+Author: Binh Phan (Binhphan@me.com)
+
+This program is a web application that allows users to export AWS GuardDuty findings
+from multiple US regions into a CSV file. It provides a simple web interface for
+selecting regions and initiating the export process.
+
+Key features:
+- Web-based interface for easy interaction
+- Dynamically fetches and displays available US AWS regions
+- Allows selection of multiple regions for export
+- Exports GuardDuty findings to a CSV file
+- Provides real-time progress updates during the export process
+
+Usage:
+1. Run the program: go run main.go
+2. Open a web browser and navigate to http://localhost:8080
+3. Select desired US regions and click "Export Findings"
+4. Wait for the export to complete and download the CSV file
+
+Note: Ensure AWS credentials are properly configured before running the program.
+*/
+
 package main
 
 import (
