@@ -1,37 +1,17 @@
-# Build stage
-FROM golang:1.23 AS builder
+FROM scratch
 
+# Set a working directory
 WORKDIR /app
 
-# Set GOPROXY to direct
-ENV GOPROXY=direct
+# Copy the AMD64 binary from your local directory to the container
+COPY main-amd64 /app/main
 
-# Copy go mod and sum files
-COPY go.mod go.sum ./
-
-# Download all dependencies
-RUN go mod download
-
-# Copy the source code into the container
-COPY . .
-
-# Build the application with all dependencies statically linked
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
-
-# Final stage
-FROM debian:buster-slim
-
-WORKDIR /app
-
-# Copy the pre-built binary file from the previous stage
-COPY --from=builder /app/main .
-
-# Copy CA certificates from the builder stage
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+# Copy the index.html file to the working directory
+COPY index.html /app/index.html
 
 # Expose port 8080 to the outside world
 EXPOSE 8080
 
-# Command to run the executable
-CMD ["./main"]
+# Set the entry point to run your application
+CMD ["/app/main"]
 

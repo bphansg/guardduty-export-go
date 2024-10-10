@@ -1,0 +1,48 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guardduty-exporter
+  labels:
+    app: guardduty-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: guardduty-exporter
+  template:
+    metadata:
+      labels:
+        app: guardduty-exporter
+    spec:
+      containers:
+      - name: guardduty-exporter
+        image: 517716713836.dkr.ecr.us-west-2.amazonaws.com/bphan/guardduty-exporter:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        env:
+        - name: AWS_REGION
+          value: "us-west-2"
+        # Add any other environment variables your app needs
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: guardduty-exporter
+spec:
+  selector:
+    app: guardduty-exporter
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: ClusterIP
+
