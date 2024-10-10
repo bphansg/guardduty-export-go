@@ -1,23 +1,23 @@
 /*
 GuardDuty Findings Exporter
 
-Author: Binh Phan (Binhphan@me.com)
+Author: Binh Phan
 
 This program is a web application that allows users to export AWS GuardDuty findings
-from multiple US regions into a CSV file. It provides a simple web interface for
+from multiple regions worldwide into a CSV file. It provides a simple web interface for
 selecting regions and initiating the export process.
 
 Key features:
 - Web-based interface for easy interaction
-- Dynamically fetches and displays available US AWS regions
-- Allows selection of multiple regions for export
+- Dynamically fetches and displays all available AWS regions
+- Allows selection of multiple regions or all regions for export
 - Exports GuardDuty findings to a CSV file
 - Provides real-time progress updates during the export process
 
 Usage:
 1. Run the program: go run main.go
 2. Open a web browser and navigate to http://localhost:8080
-3. Select desired US regions and click "Export Findings"
+3. Select desired regions from the dropdown menu and click "Export Findings"
 4. Wait for the export to complete and download the CSV file
 
 Note: Ensure AWS credentials are properly configured before running the program.
@@ -74,9 +74,9 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, nil)
 }
 
-// handleRegions returns a list of US regions as JSON
+// handleRegions returns a list of all AWS regions as JSON
 func handleRegions(w http.ResponseWriter, r *http.Request) {
-	regions, err := getUSRegions(cfg)
+	regions, err := getAllRegions(cfg)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -150,8 +150,8 @@ func handleExport(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(filename))
 }
 
-// getUSRegions returns a list of US AWS regions
-func getUSRegions(cfg aws.Config) ([]string, error) {
+// getAllRegions returns a list of all AWS regions
+func getAllRegions(cfg aws.Config) ([]string, error) {
 	client := ec2.NewFromConfig(cfg)
 	resp, err := client.DescribeRegions(context.TODO(), &ec2.DescribeRegionsInput{})
 	if err != nil {
@@ -160,10 +160,7 @@ func getUSRegions(cfg aws.Config) ([]string, error) {
 
 	var regions []string
 	for _, region := range resp.Regions {
-		// Filter for US regions only
-		if aws.ToString(region.RegionName)[:2] == "us" {
-			regions = append(regions, aws.ToString(region.RegionName))
-		}
+		regions = append(regions, aws.ToString(region.RegionName))
 	}
 	return regions, nil
 }

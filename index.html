@@ -37,11 +37,18 @@
             display: none;
             margin-top: 20px;
         }
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
     <h1>GuardDuty Findings Exporter</h1>
-    <div id="regions"></div>
+    <select id="regions" multiple size="10"></select>
+    <button onclick="selectAll()">Select All</button>
+    <button onclick="deselectAll()">Deselect All</button>
     <button onclick="exportFindings()">Export Findings</button>
     <div id="progress">Exporting findings... Please wait.</div>
     <div id="result"></div>
@@ -51,28 +58,33 @@
             fetch('/api/regions')
                 .then(response => response.json())
                 .then(regions => {
-                    const regionsDiv = document.getElementById('regions');
+                    const selectElement = document.getElementById('regions');
                     regions.forEach(region => {
-                        const checkbox = document.createElement('input');
-                        checkbox.type = 'checkbox';
-                        checkbox.id = region;
-                        checkbox.name = 'region';
-                        checkbox.value = region;
-
-                        const label = document.createElement('label');
-                        label.htmlFor = region;
-                        label.appendChild(document.createTextNode(region));
-
-                        regionsDiv.appendChild(checkbox);
-                        regionsDiv.appendChild(label);
-                        regionsDiv.appendChild(document.createElement('br'));
+                        const option = document.createElement('option');
+                        option.value = region;
+                        option.text = region;
+                        selectElement.appendChild(option);
                     });
                 });
         });
 
+        function selectAll() {
+            const selectElement = document.getElementById('regions');
+            for (let i = 0; i < selectElement.options.length; i++) {
+                selectElement.options[i].selected = true;
+            }
+        }
+
+        function deselectAll() {
+            const selectElement = document.getElementById('regions');
+            for (let i = 0; i < selectElement.options.length; i++) {
+                selectElement.options[i].selected = false;
+            }
+        }
+
         function exportFindings() {
-            const selectedRegions = Array.from(document.querySelectorAll('input[name="region"]:checked'))
-                .map(checkbox => checkbox.value);
+            const selectedRegions = Array.from(document.getElementById('regions').selectedOptions)
+                .map(option => option.value);
 
             if (selectedRegions.length === 0) {
                 alert('Please select at least one region.');
