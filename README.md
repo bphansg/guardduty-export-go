@@ -19,6 +19,7 @@ GuardDuty Findings Exporter is a Go-based web application that allows users to e
 1. Clone the repository:
 
 git clone https://github.com/yourusername/guardduty-findings-exporter.git
+
 cd guardduty-findings-exporter
 
 2. Install dependencies:
