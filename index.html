@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GuardDuty Findings Exporter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        #regions {
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        #progress {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>GuardDuty Findings Exporter</h1>
+    <div id="regions"></div>
+    <button onclick="exportFindings()">Export Findings</button>
+    <div id="progress">Exporting findings... Please wait.</div>
+    <div id="result"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/api/regions')
+                .then(response => response.json())
+                .then(regions => {
+                    const regionsDiv = document.getElementById('regions');
+                    regions.forEach(region => {
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.id = region;
+                        checkbox.name = 'region';
+                        checkbox.value = region;
+
+                        const label = document.createElement('label');
+                        label.htmlFor = region;
+                        label.appendChild(document.createTextNode(region));
+
+                        regionsDiv.appendChild(checkbox);
+                        regionsDiv.appendChild(label);
+                        regionsDiv.appendChild(document.createElement('br'));
+                    });
+                });
+        });
+
+        function exportFindings() {
+            const selectedRegions = Array.from(document.querySelectorAll('input[name="region"]:checked'))
+                .map(checkbox => checkbox.value);
+
+            if (selectedRegions.length === 0) {
+                alert('Please select at least one region.');
+                return;
+            }
+
+            const progressDiv = document.getElementById('progress');
+            const resultDiv = document.getElementById('result');
+            
+            progressDiv.style.display = 'block';
+            resultDiv.textContent = '';
+
+            const queryString = selectedRegions.map(region => `regions=${encodeURIComponent(region)}`).join('&');
+            fetch(`/api/export?${queryString}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(filename => {
+                    progressDiv.style.display = 'none';
+                    resultDiv.textContent = `Findings exported to ${filename}`;
+                })
+                .catch(error => {
+                    progressDiv.style.display = 'none';
+                    resultDiv.textContent = `Error: ${error.message}`;
+                });
+        }
+    </script>
+</body>
+</html>
